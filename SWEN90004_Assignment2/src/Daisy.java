@@ -2,7 +2,7 @@ public class Daisy {
 	public enum TYPE {WHITE, BLACK};
 	protected TYPE type;
 	private int age;
-	private float albedo;
+	protected double albedo;
 	
 	public Daisy(TYPE type) {
 		this.type = type;
@@ -11,6 +11,7 @@ public class Daisy {
 		} else {
 			albedo = DaisyWorld.albedoOfBlacks;
 		}
+		// set age random max-age
 		age = (int)(Math.random() * DaisyWorld.maxDaisyAge);
 	}
 }

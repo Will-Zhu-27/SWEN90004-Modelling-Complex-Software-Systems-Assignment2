@@ -25,32 +25,41 @@ daisies-own [
 
 to setup
   clear-all
-  set-default-shape daisies "flower"
-  ask patches [ set pcolor gray ]
-
+  set-default-shape daisies "flower"      //将daisies形状设为"flower"
+  ask patches [ set pcolor gray ]         //将patches设为灰色，即背景设为灰色
+  
+  // 对全局变量赋值
   set max-age 25
   set global-temperature 0
 
+  // 根据scenario下拉框选择不同，对solar-luminosity进行相应赋值
   if (scenario = "ramp-up-ramp-down"    ) [ set solar-luminosity 0.8 ]
   if (scenario = "low solar luminosity" ) [ set solar-luminosity 0.6 ]
   if (scenario = "our solar luminosity" ) [ set solar-luminosity 1.0 ]
   if (scenario = "high solar luminosity") [ set solar-luminosity 1.4 ]
 
+  // 启动进程
   seed-blacks-randomly
   seed-whites-randomly
+
+  // 对daisies集合中的变量统一设值
   ask daisies [set age random max-age]
+  // 对patches启动calc-temperature进程
   ask patches [calc-temperature]
+  // global赋值为全部patches的temperature的平均值
   set global-temperature (mean [temperature] of patches)
   update-display
   reset-ticks
 end
 
 to seed-blacks-randomly
+  // 生成 总patch数量 * start-%-blacks / 100的black daisy（结果四舍五入），只在当前没有daisy的patch生成
    ask n-of round ((start-%-blacks * count patches) / 100) patches with [not any? daisies-here]
      [ sprout-daisies 1 [set-as-black] ]
 end
 
 to seed-whites-randomly
+  // 生成 总patch数量 * start-%-blacks / 100的white daisy（结果四舍五入），只在当前没有daisy的patch生成
    ask n-of floor ((start-%-whites * count patches) / 100) patches with [not any? daisies-here]
      [ sprout-daisies 1 [set-as-white] ]
 end
@@ -63,13 +72,19 @@ end
 
 to go
    ask patches [calc-temperature]
+   // 每个patch将它的50%的temperature均分给8个邻居(无论有没有8个邻居，邻居都只得到1/8)
    diffuse temperature .5
+   // 检查每个daisies是否达到年龄的最大值和是否繁殖新的daisy
    ask daisies [check-survivability]
+   // 更新global-temperature值
    set global-temperature (mean [temperature] of patches)
+   // 更新显示
    update-display
+   // 计数
    tick
    if scenario = "ramp-up-ramp-down" [
      if ticks > 200 and ticks <= 400 [
+       // 在计数>200且<=400时，更新solar-luminosity,精确到小数点后4位
        set solar-luminosity precision (solar-luminosity + 0.005) 4
      ]
      if ticks > 600 and ticks <= 850 [
@@ -96,12 +111,14 @@ to set-as-white  ;; turtle procedure
 end
 
 to check-survivability ;; turtle procedure
+  // 定义本地变量
   let seed-threshold 0
   let not-empty-spaces nobody
   let seeding-place nobody
 
   set age (age + 1)
   ifelse age < max-age
+  // 未到达max-age
   [
      set seed-threshold ((0.1457 * temperature) - (0.0032 * (temperature ^ 2)) - 0.6443)
      ;; This equation may look complex, but it is just a parabola.
@@ -111,7 +128,8 @@ to check-survivability ;; turtle procedure
      ;; Thus, growth of new daisies can only occur within this temperature range,
      ;; with decreasing probability of growth new daisies closer to the x-intercepts of the parabolas
      ;; remember, however, that this probability calculation is based on the local temperature.
-
+    
+    // 繁殖新的daisy
      if (random-float 1.0 < seed-threshold) [
        set seeding-place one-of neighbors with [not any? daisies-here]
 
@@ -132,16 +150,21 @@ to check-survivability ;; turtle procedure
 end
 
 to calc-temperature  ;; patch procedure
+  // let 定义本地变量
   let absorbed-luminosity 0
   let local-heating 0
+
   ifelse not any? daisies-here
+  // 在呼叫的patch上没有daisy
   [   ;; the percentage of absorbed energy is calculated (1 - albedo-of-surface) and then multiplied by the solar-luminosity
       ;; to give a scaled absorbed-luminosity.
     set absorbed-luminosity ((1 - albedo-of-surface) * solar-luminosity)
   ]
+  // 在呼叫的patch上有daisy
   [
       ;; the percentage of absorbed energy is calculated (1 - albedo) and then multiplied by the solar-luminosity
       ;; to give a scaled absorbed-luminosity.
+    // 从在呼叫的patch上的daisies集合中随机拿出一个，用它（daisy）的albedo值对该patch的absorbed-luminosity进行赋值
     ask one-of daisies-here
       [set absorbed-luminosity ((1 - albedo) * solar-luminosity)]
   ]
@@ -152,6 +175,8 @@ to calc-temperature  ;; patch procedure
   ifelse absorbed-luminosity > 0
       [set local-heating 72 * ln absorbed-luminosity + 80]
       [set local-heating 80]
+
+  // 对该patch的temperature进行赋值
   set temperature ((temperature + local-heating) / 2)
      ;; set the temperature at this patch to be the average of the current temperature and the local-heating effect
 end
@@ -178,10 +203,12 @@ end
 
 to update-display
   ifelse (show-temp-map? = true)
+    // 如果show-temp-map按钮打开, 一个patch的temperature越大，则该patch红色的阴影越浅。当temperature小于-50，则是最暗的红色，当temperature大于110，则是最亮的红色
     [ ask patches [set pcolor scale-color red temperature -50 110] ]  ;; scale color of patches to the local temperature
+    // 如果没打开，则还是灰色
     [ ask patches [set pcolor grey] ]
 
-  ifelse (show-daisies? = true)
+  ifelse (show-daisies? = true) 
     [ ask daisies [set hidden? false] ]
     [ ask daisies [set hidden? true] ]
 end

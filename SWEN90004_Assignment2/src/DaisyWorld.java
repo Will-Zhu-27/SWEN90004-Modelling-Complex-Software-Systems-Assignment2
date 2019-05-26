@@ -1,4 +1,15 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+
+
+
 public class DaisyWorld {
+	public final static int X_COR = 0;
+	public final static int Y_COR = 1;
+	public final static int MIN_PXCOR = -14;
+	public final static int MAX_PXCOR = 14;
+	public final static int MIN_PYCOR = -14;
+	public final static int MAX_PYCOR = 14;
 	public final static int MAX_START_DAISY = 50;
 	public final static int MIN_START_DAISY = 0;
 	public final static float MAX_DAISY_ALBEDO = 0;
@@ -12,14 +23,113 @@ public class DaisyWorld {
 	private String scenario = null;
 	private long ticks = 0;
 	private long currentTick = 0;
-	private float startWhites = 20;
-	private float albedoOfWhites = 0.75f;
+	private int startWhites = 20;
+	public static float albedoOfWhites = 0.75f;
 	private int startBlacks = 20;
-	private float albedoOfBlacks = 0.75f;
+	public static float albedoOfBlacks = 0.75f;
 	private float solarLuminosity = 0.8f;
 	private float albedoOfSurface = 0.4f;
-	
+	private int numBlacks = 0;
+	private int numWhites = 0;
+	private float globalTemperature = 0;
+	public static int maxDaisyAge = 25;
+	HashMap <String, Patch> patchGraph = new HashMap<>();
 	public DaisyWorld(String[] commands) {
+		getInput(commands);
+		String paramterString = getExperimentParameter();
+		System.out.println(paramterString);
+		initialize();
+	}
+	
+	private void initialize() {
+		// initialize patchGraph
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = new Patch();
+				patchGraph.put(coordinate, patch);
+			}
+		}
+		/*
+		String test = "0,0";
+		if (patchGraph.containsKey(test)) {
+			System.out.println("contain");
+		} else {
+			System.out.println("no contain");
+		}
+		*/
+		// seed-blacks-randomly
+		setDaisyRandomly(Daisy.TYPE.BLACK);
+		// seed-whites-randomly
+		setDaisyRandomly(Daisy.TYPE.WHITE);
+		
+		// print the daisy distribution graph
+		System.out.print(getDistributionGraph());
+	}
+	
+	private String getDistributionGraph() {
+		String ret = "";
+		for (int y = MAX_PYCOR, x; y >= MIN_PYCOR; y--) {
+			for (x = MIN_PXCOR; x <= MAX_PXCOR; x++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				if (patch.daisy == null) {
+					ret = ret + " ";
+				} else if (patch.daisy.type == Daisy.TYPE.BLACK) {
+					ret = ret + "B";
+				} else {
+					ret = ret + "W";
+				}
+				if (x == MAX_PXCOR) {
+					ret = ret + "\n";
+				}
+			}
+		}
+		return ret;
+	}
+	
+	private void setDaisyRandomly(Daisy.TYPE type) {
+		ArrayList<Patch> emptyPatchList = getEmptyPatchList();
+		int totalPatch = (MAX_PXCOR - MIN_PXCOR + 1) * (MAX_PYCOR - MIN_PYCOR + 1);
+		int num;
+		if (type == Daisy.TYPE.BLACK) {
+			num = totalPatch * startBlacks / 100;
+		} else {
+			num = totalPatch * startWhites / 100;
+		}
+		for (int i = 0; i < num; i++) {
+			Patch emptyPatch = getRandomPatch(emptyPatchList);
+			emptyPatch.daisy = new Daisy(type);	
+		}
+	}
+	
+	/**
+	 * get patch in random and remove it from patchList 
+	 */
+	private Patch getRandomPatch(ArrayList<Patch> patchList) {
+		int listLength = patchList.size();
+		int index = (int) (Math.random() * listLength);
+		Patch ret = patchList.get(index);
+		patchList.remove(index);
+		patchList.trimToSize();
+		return ret;
+	}
+	
+	private ArrayList<Patch> getEmptyPatchList() {
+		ArrayList<Patch> emptyPatchList = new ArrayList<Patch>();
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				if (patch.daisy == null) {
+					emptyPatchList.add(patch);
+				}
+			}
+		}
+		return emptyPatchList;
+	}
+	
+	private void getInput(String[] commands) {
 		for(int i = 0; i < commands.length; i++) {
 			switch (commands[i]) {
 				case "-ticks": {
@@ -176,8 +286,6 @@ public class DaisyWorld {
 			System.err.println("Need \"-ticks\" to spicify ticks.");
 				System.exit(1);
 		}
-		String paramterString = getExperimentParameter();
-		System.out.println(paramterString);
 	}
 	
 	public String getExperimentParameter() {

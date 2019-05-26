@@ -13,3 +13,8 @@ example: Simulator -ticks 2000 -start-%-whites 24 -albedo-of-whites 0.5 -start-%
 预计得到的输出cvs格式为
 初始参数
 tick num-white-daisy num-black-daisy luminosity global temperature
+
+29 * 29 坐标范围
+
+-start-%-whites 1 8个
+-start-%-whites 2 16个

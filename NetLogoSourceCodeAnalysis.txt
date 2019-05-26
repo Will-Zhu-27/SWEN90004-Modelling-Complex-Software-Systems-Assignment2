@@ -53,7 +53,7 @@ to setup
 end
 
 to seed-blacks-randomly
-  // 生成 总patch数量 * start-%-blacks / 100的black daisy（结果四舍五入），只在当前没有daisy的patch生成
+  // 生成 总patch数量 * start-%-blacks / 100的black daisy（结果四舍五入），只在当前没有daisy的patch生成, 实际上没有四舍五入，只看整数部分
    ask n-of round ((start-%-blacks * count patches) / 100) patches with [not any? daisies-here]
      [ sprout-daisies 1 [set-as-black] ]
 end

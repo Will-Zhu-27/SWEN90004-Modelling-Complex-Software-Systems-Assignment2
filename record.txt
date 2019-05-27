@@ -20,3 +20,5 @@ tick num-white-daisy num-black-daisy luminosity global temperature
 -start-%-whites 2 16个
 
 同一个Patch上有多个Daisy吗？
+
+checkSurvivabilityHandler() 部分实际上应该随机的。

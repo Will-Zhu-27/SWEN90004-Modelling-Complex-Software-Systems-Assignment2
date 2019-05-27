@@ -18,4 +18,29 @@ public class Patch {
 		}
 		temperature = (temperature + localHeating) / 2;
 	}
+	
+	/**
+	 * check the survivability of the daisy in this patch
+	 * @return true if it request to generate a same type daisy
+	 */
+	public boolean checkSurvivability() {
+		if (daisy == null) {
+			return false;
+		}
+		
+		double seedThreshold = 0;
+		daisy.age++;
+		if(daisy.age < DaisyWorld.maxDaisyAge) {
+			seedThreshold = (0.1457 * temperature) - (0.0032 * temperature * temperature) - 0.6443;
+			if (Math.random() < seedThreshold) {
+				return true;
+			}
+			return false;
+		}
+		// die
+		else {
+			daisy = null;
+			return false;
+		}
+	}
 }

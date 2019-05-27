@@ -40,6 +40,7 @@ public class DaisyWorld {
 		String paramterString = getExperimentParameter();
 		System.out.println(paramterString);
 		initialize();
+		runInTick();
 	}
 	
 	private void runInTick() {
@@ -53,8 +54,66 @@ public class DaisyWorld {
 			}
 			
 			// diffuse temperature .5
-			
+			diffuseHandler();
+			// ask daisies [check-survivability]
+			checkSurvivabilityHandler();
+			// set global-temperature (mean [temperature] of patches)
+			setGlobalTemperature();
 			currentTick++;
+			if (scenario.equals("ramp-up-ramp-down")) {
+				if (currentTick > 200 && currentTick <= 400) {		
+					// need to up to 4 digits after the decimal point
+					String temp = String.valueOf(Math.round((solarLuminosity + 0.005) * 10000));
+					solarLuminosity = Double.parseDouble(temp)/10000;
+				}
+				if (currentTick > 600 && currentTick <= 850) {
+					// need to up to 4 digits after the decimal point
+					String temp = String.valueOf(Math.round((solarLuminosity - 0.0025 ) * 10000));
+					solarLuminosity = Double.parseDouble(temp)/10000;
+				}
+			}
+			if (scenario.equals("low-solar-luminosity")) {
+				solarLuminosity = 0.6;
+			}
+			if (scenario.equals("our-solar-luminosity")) {
+				solarLuminosity = 1.0;
+			}
+			if (scenario.equals("high-solar-luminosity")) {
+				solarLuminosity = 1.4;
+			}
+		}
+	}
+	
+	private void setGlobalTemperature() {
+		double totalTemperature = 0;
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				totalTemperature += patchGraph.get(coordinate).temperature;
+			}
+		}
+		int totalPatches = (MAX_PXCOR - MIN_PXCOR + 1) * (MAX_PYCOR - MIN_PYCOR + 1);
+		globalTemperature = totalTemperature / totalPatches;
+	}
+	
+	private void checkSurvivabilityHandler() {
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				// breed a same type daisy
+				if(patch.checkSurvivability() == true) {
+					//boolean flag = false;
+					for (String neighbourCoordinate : getNeighbours(x, y)) {
+						Patch neighbour = patchGraph.get(neighbourCoordinate);
+						if (neighbour.daisy == null) {
+							neighbour.daisy = new Daisy(patch.daisy.type);
+							//flag = true;
+							break;
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -117,19 +176,22 @@ public class DaisyWorld {
 				patchGraph.put(coordinate, patch);
 			}
 		}
-		/*
-		String test = "0,0";
-		if (patchGraph.containsKey(test)) {
-			System.out.println("contain");
-		} else {
-			System.out.println("no contain");
-		}
-		*/
+		
 		// seed-blacks-randomly
 		setDaisyRandomly(Daisy.TYPE.BLACK);
 		// seed-whites-randomly
 		setDaisyRandomly(Daisy.TYPE.WHITE);
 		
+		// ask daisies [set age random max-age]
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				if (patch.daisy != null) {
+					patch.daisy.setRandomAge();
+				}
+			}
+		}
 		/* print the daisy distribution graph
 		System.out.print(getDistributionGraph());
 		*/

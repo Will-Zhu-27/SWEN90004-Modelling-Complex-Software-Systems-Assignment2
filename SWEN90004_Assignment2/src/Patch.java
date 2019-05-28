@@ -50,4 +50,52 @@ public class Patch {
 			return false;
 		}
 	}
+	
+	public boolean checkRabbitSurvivability() {
+		if (rabbit == null) {
+			return false;
+		}
+		rabbit.age++;
+		if(rabbit.age < Rabbit.MAX_RABBIT_AGE) {
+			if (rabbit.gender == Rabbit.GENDER.MALE) {
+				return false;
+			} else {
+				// in appropriate temperature
+				if(temperature <= Rabbit.MAX_BREED_TEMPERATURE && temperature >= Rabbit.MIN_BREED_TEMPERATURE && rabbit.hungry < 0) {
+					return true;
+				}
+				return false;
+			}
+		}
+		// die
+		else {
+			rabbit = null;
+			return false;
+		}		
+	}
+	
+	public boolean rabbitMove() {
+		if (rabbit == null ) {
+			return false;
+		}
+		// eat the daisy
+		if (daisy != null && rabbit.hungry > 0) {
+			daisy = null;
+			rabbit.hungry = rabbit.hungry - 5;
+		}
+		// be hungry
+		else {
+			rabbit.hungry++;
+		}
+		
+		// too hungry to die
+		if (rabbit.hungry >= Rabbit.MAX_HUNGRY) {
+			rabbit = null;
+			return false;
+		} 
+		// move to empty patch
+		else {
+			return true;
+		}
+	}
 }

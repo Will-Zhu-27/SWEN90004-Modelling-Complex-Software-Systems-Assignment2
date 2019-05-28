@@ -43,7 +43,12 @@ public class DaisyWorld {
 		getInput(commands);
 		String paramterString = getExperimentParameter();
 		System.out.println(paramterString);
-		output = new Output(Simulator.OUTPUT_FILE_PATH, paramterString);	
+		if (isExtended == true) {
+			output = new Output(Simulator.OUTPUT_FILE_PATH, paramterString, Output.HEADER_EXTENDED);
+		} else {
+			output = new Output(Simulator.OUTPUT_FILE_PATH, paramterString, Output.HEADER);
+		}
+			
 		initialize();
 		runInTick();
 		output.endOutput();
@@ -54,7 +59,15 @@ public class DaisyWorld {
 			
 			numBlacks = getDaisyNum(Daisy.TYPE.BLACK);
 			numWhites = getDaisyNum(Daisy.TYPE.WHITE);
-			String data = String.format("%12d,%22d,%22d,%17.3f,%25.1f\n", currentTick, numWhites, numBlacks, solarLuminosity, globalTemperature);
+			numMaleRabbits = getRabbitsNum(Rabbit.GENDER.MALE);
+			numFemaleRabbits = getRabbitsNum(Rabbit.GENDER.FEMALE);
+			String data = null;
+			if (isExtended == true) {
+				data = String.format("%5d,%5d,%5d,%5.3f,%5.1f,%5d,%5d\n", currentTick, numWhites, numBlacks, solarLuminosity, globalTemperature,numMaleRabbits,numFemaleRabbits); 
+			} else {
+				data = String.format("%5d,%5d,%5d,%5.3f,%5.1f\n", currentTick, numWhites, numBlacks, solarLuminosity, globalTemperature);
+			}
+			
 			//System.out.println(data);
 			output.write(data);
 			
@@ -78,6 +91,10 @@ public class DaisyWorld {
 			
 			// ask daisies [check-survivability]
 			checkSurvivabilityHandler();
+			if (isExtended == true) {
+				checkRabbitsSurvivabilityHandler();
+				rabbitsMoveHandler();
+			}
 			// set global-temperature (mean [temperature] of patches)
 			setGlobalTemperature();
 			currentTick++;
@@ -106,6 +123,45 @@ public class DaisyWorld {
 		}
 	}
 	
+	private void rabbitsMoveHandler() {
+		ArrayList<Patch> patchList = getPatchList();
+		int num = patchList.size();
+		for (int i = 0; i < num; i++) {
+			Patch randomPatch = getRandomPatch(patchList);
+			if (randomPatch == null) {
+				return;
+			}
+			// rabbit move
+			if (randomPatch.rabbitMove() == true) {
+				ArrayList<String> neighbourCoordinateList = new ArrayList<String>();
+				String[] neighbourCoordinateSets = getNeighbours(randomPatch.x, randomPatch.y);
+				for (int j = 0; j < neighbourCoordinateSets.length; j++) {
+					neighbourCoordinateList.add(neighbourCoordinateSets[j]);
+				}
+				boolean isEmptyExist = false;
+				Patch newRabbitlocation = null;
+				while(isEmptyExist == false) {
+					if (neighbourCoordinateList.size() == 0) {
+						break;
+					}
+					int index = (int) (Math.random() * neighbourCoordinateList.size());
+					String neighbourCoordinate = neighbourCoordinateList.get(index);
+					neighbourCoordinateList.remove(index);
+					neighbourCoordinateList.trimToSize();
+					Patch neighbour = patchGraph.get(neighbourCoordinate);
+					if (isEmptyExist == false && neighbour.rabbit == null) {
+						newRabbitlocation = neighbour;
+						isEmptyExist = true;
+					}
+				}
+				if (isEmptyExist == true) {
+					newRabbitlocation.rabbit = randomPatch.rabbit;
+					randomPatch.rabbit = null;
+				}
+			}
+		}
+	}
+	
 	private int getDaisyNum(Daisy.TYPE type) {
 		int num = 0;
 		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
@@ -113,6 +169,21 @@ public class DaisyWorld {
 				String coordinate = String.valueOf(x) + "," + y;
 				Patch patch = patchGraph.get(coordinate);
 				if (patch.daisy != null && patch.daisy.type == type) {
+					num++;
+				}
+			}
+		}
+		return num;
+	}
+	
+	
+	private int getRabbitsNum(Rabbit.GENDER gender) {
+		int num = 0;
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				if (patch.rabbit != null && patch.rabbit.gender == gender) {
 					num++;
 				}
 			}
@@ -130,6 +201,53 @@ public class DaisyWorld {
 		}
 		int totalPatches = (MAX_PXCOR - MIN_PXCOR + 1) * (MAX_PYCOR - MIN_PYCOR + 1);
 		globalTemperature = totalTemperature / totalPatches;
+	}
+	
+	private void checkRabbitsSurvivabilityHandler() {
+		ArrayList<Patch> patchList = getPatchList();
+		int num = patchList.size();
+		for (int i = 0; i < num; i++) {
+			Patch randomPatch = getRandomPatch(patchList);
+			if (randomPatch == null) {
+				return;
+			}
+			// breed a rabbit
+			if(randomPatch.checkRabbitSurvivability() == true) {
+				//boolean flag = false;
+				ArrayList<String> neighbourCoordinateList = new ArrayList<String>();
+				String[] neighbourCoordinateSets = getNeighbours(randomPatch.x, randomPatch.y);
+				for (int j = 0; j < neighbourCoordinateSets.length; j++) {
+					neighbourCoordinateList.add(neighbourCoordinateSets[j]);
+				}
+				boolean isMaleExist = false;
+				boolean isEmptyExist = false;
+				Patch newRabbitlocation = null;
+				while(isMaleExist == false || isEmptyExist == false) {
+					if (neighbourCoordinateList.size() == 0) {
+						break;
+					}
+					int index = (int) (Math.random() * neighbourCoordinateList.size());
+					String neighbourCoordinate = neighbourCoordinateList.get(index);
+					neighbourCoordinateList.remove(index);
+					neighbourCoordinateList.trimToSize();
+					Patch neighbour = patchGraph.get(neighbourCoordinate);
+					if (isMaleExist ==false && neighbour.rabbit != null && neighbour.rabbit.gender == Rabbit.GENDER.MALE) {
+						isMaleExist = true;
+					}
+					if (isEmptyExist == false && neighbour.rabbit == null) {
+						newRabbitlocation = neighbour;
+						isEmptyExist = true;
+					}
+				}
+				if (isMaleExist == true && isEmptyExist == true) {
+					if (Math.random() < 0.5) {
+						newRabbitlocation.rabbit = new Rabbit(Rabbit.GENDER.MALE);
+					} else {
+						newRabbitlocation.rabbit = new Rabbit(Rabbit.GENDER.FEMALE);
+					}
+				}	
+			}	
+		}		
 	}
 	
 	private void checkSurvivabilityHandler() {
@@ -231,6 +349,17 @@ public class DaisyWorld {
 			setRabbitRandomly(Rabbit.GENDER.MALE);
 			setRabbitRandomly(Rabbit.GENDER.FEMALE);
 			System.out.println(getDistributionRabbitsGraph());
+			// ask rabbits set random age and hungry
+			for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+				for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+					String coordinate = String.valueOf(x) + "," + y;
+					Patch patch = patchGraph.get(coordinate);
+					if (patch.rabbit != null) {
+						patch.rabbit.setRandomAge();
+						patch.rabbit.setRandomHungry();
+					}
+				}
+			}
 		}
 		
 		// seed-blacks-randomly

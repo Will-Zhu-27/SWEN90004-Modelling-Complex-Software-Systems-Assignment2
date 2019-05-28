@@ -4,11 +4,14 @@ import java.io.IOException;
 
 public class Output {
 	public static final String HEADER = 
-		"        tick,       num-white-daisy,       num-black-daisy,       luminosity,       global-temperature\r\n";
+		"tick,num-white-daisy,num-black-daisy,luminosity,global-temperature\r\n";
+	public static final String HEADER_EXTENDED = 
+		"tick,num-white-daisy,num-black-daisy,luminosity,global-temperature,num-male-rabbits" +
+		",num-female-rabbits\r\n";
 	private String fileName;
 	private FileWriter fileWritter;
 	
-	public Output(String fileName, String ParametersInfo) {
+	public Output(String fileName, String ParametersInfo, String header) {
 		this.fileName = fileName;
 		File file = new File(fileName);
 		try {
@@ -22,7 +25,7 @@ public class Output {
 			// replace the origin content
 			fileWritter = new FileWriter(file.getName(), false);
 			write(ParametersInfo);
-			write(HEADER);
+			write(header);
 			
 		} catch (IOException e) {
 			e.printStackTrace();

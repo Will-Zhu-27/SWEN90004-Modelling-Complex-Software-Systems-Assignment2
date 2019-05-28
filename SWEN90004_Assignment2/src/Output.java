@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Output {
 	public static final String HEADER = 
-		"        tick        num-white-daisy        num-black-daisy        luminosity        global-temperature\r\n";
+		"        tick,       num-white-daisy,       num-black-daisy,       luminosity,       global-temperature\r\n";
 	private String fileName;
 	private FileWriter fileWritter;
 	

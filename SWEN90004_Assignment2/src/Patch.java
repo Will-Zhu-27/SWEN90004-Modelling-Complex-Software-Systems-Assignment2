@@ -1,7 +1,7 @@
 public class Patch {
 	protected Daisy daisy = null;
-	protected double temperature = 0;
-	protected double receicedDiffuse = 0;
+	protected double temperature = 0D;
+	protected double receicedDiffuse = 0D;
 	protected int x;
 	protected int y;
 	
@@ -11,7 +11,7 @@ public class Patch {
 	}
 	public void calTemperature() {
 		double absorbedLuminosity = 0;
-		double localHeating = 0;
+		double localHeating = 0D;
 		if (daisy == null) {
 			absorbedLuminosity = (1 - DaisyWorld.albedoOfSurface) * DaisyWorld.solarLuminosity;
 		} else {
@@ -20,7 +20,7 @@ public class Patch {
 		if( absorbedLuminosity > 0) {
 			localHeating = 72 * Math.log(absorbedLuminosity) + 80;
 		} else {
-			localHeating = 80;
+			localHeating = 80D;
 		}
 		temperature = (temperature + localHeating) / 2;
 	}
@@ -34,7 +34,7 @@ public class Patch {
 			return false;
 		}
 		
-		double seedThreshold = 0;
+		double seedThreshold = 0D;
 		daisy.age++;
 		if(daisy.age < DaisyWorld.maxDaisyAge) {
 			seedThreshold = (0.1457 * temperature) - (0.0032 * temperature * temperature) - 0.6443;

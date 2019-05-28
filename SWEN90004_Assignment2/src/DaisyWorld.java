@@ -15,21 +15,21 @@ public class DaisyWorld {
 	public final static int MIN_START_DAISY = 0;
 	public final static double MAX_DAISY_ALBEDO = 0;
 	public final static double MIN_DAISY_ALBEDO =  0.99;
-	public final static double MAX_SOLAR_LUMINOSITY = 3f;
-	public final static double MIN_SOLAR_LUMINOSITY = 0f;
-	public final static double MAX_ALBEDO_OF_SURFACE = 1f;
-	public final static double MIN_ALBEDO_OF_SURFACE = 0;
+	public final static double MAX_SOLAR_LUMINOSITY = 3D;
+	public final static double MIN_SOLAR_LUMINOSITY = 0D;
+	public final static double MAX_ALBEDO_OF_SURFACE = 1D;
+	public final static double MIN_ALBEDO_OF_SURFACE = 0D;
 	public final static String[] SCENARIO = {"maintain-current-luminosity", "ramp-up-ramp-down", 
 		"low-solar-luminosity", "our-solar-luminosity", "high-solar-luminosity"}; 
 	private String scenario = null;
 	private long ticks = 0;
 	private long currentTick = 0;
 	private int startWhites = 20;
-	public static double albedoOfWhites = 0.75;
+	public static double albedoOfWhites = 0.75D;
 	private int startBlacks = 20;
-	public static double albedoOfBlacks = 0.25;
-	protected static double solarLuminosity = 0.8;
-	public static double albedoOfSurface = 0.4;
+	public static double albedoOfBlacks = 0.25D;
+	protected static double solarLuminosity = 0.8D;
+	public static double albedoOfSurface = 0.4D;
 	private int numBlacks = 0;
 	private int numWhites = 0;
 	private double globalTemperature = 0;
@@ -51,7 +51,7 @@ public class DaisyWorld {
 			
 			numBlacks = getDaisyNum(Daisy.TYPE.BLACK);
 			numWhites = getDaisyNum(Daisy.TYPE.WHITE);
-			String data = String.format("%12d%23d%23d%18.3f%26.1f\n", currentTick, numWhites, numBlacks, solarLuminosity, globalTemperature);
+			String data = String.format("%12d,%22d,%22d,%17.3f,%25.1f\n", currentTick, numWhites, numBlacks, solarLuminosity, globalTemperature);
 			//System.out.println(data);
 			output.write(data);
 			
@@ -240,7 +240,7 @@ public class DaisyWorld {
 			}
 		}
 		// print the daisy distribution graph
-		System.out.print(getDistributionGraph());
+		//System.out.print(getDistributionGraph());
 		
 		
 		// ask patches [calc-temperature]
@@ -252,7 +252,7 @@ public class DaisyWorld {
 		}
 		
 		// print the patch temperature distribution graph
-		System.out.print(getDistributionTemperatureGraph());
+		// System.out.print(getDistributionTemperatureGraph());
 	}
 	
 	private String getDistributionGraph() {
@@ -498,13 +498,13 @@ public class DaisyWorld {
 		
 		if (scenario != null) {
 			if (scenario.equals(SCENARIO[1])) {
-				solarLuminosity =0.8f;
+				solarLuminosity =0.8D;
 			} else if (scenario.equals(SCENARIO[2])) {
-				solarLuminosity =0.6f;
+				solarLuminosity =0.6D;
 			} else if (scenario.equals(SCENARIO[3])) {
-				solarLuminosity = 1f;
+				solarLuminosity = 1D;
 			} else if (scenario.equals(SCENARIO[4])) {
-				solarLuminosity = 1.4f;
+				solarLuminosity = 1.4D;
 			}
 		} else {
 			scenario = SCENARIO[0];

@@ -27,24 +27,34 @@ public class DaisyWorld {
 	private int startWhites = 20;
 	public static double albedoOfWhites = 0.75;
 	private int startBlacks = 20;
-	public static double albedoOfBlacks = 0.75;
+	public static double albedoOfBlacks = 0.25;
 	protected static double solarLuminosity = 0.8;
 	public static double albedoOfSurface = 0.4;
 	private int numBlacks = 0;
 	private int numWhites = 0;
 	private double globalTemperature = 0;
 	public static int maxDaisyAge = 25;
-	HashMap <String, Patch> patchGraph = new HashMap<>();
+	private HashMap <String, Patch> patchGraph = new HashMap<>();
+	private Output output;
 	public DaisyWorld(String[] commands) {
 		getInput(commands);
 		String paramterString = getExperimentParameter();
 		System.out.println(paramterString);
+		output = new Output(Simulator.OUTPUT_FILE_PATH, paramterString);	
 		initialize();
 		runInTick();
+		output.endOutput();
 	}
 	
 	private void runInTick() {
 		while(currentTick != ticks) {
+			
+			numBlacks = getDaisyNum(Daisy.TYPE.BLACK);
+			numWhites = getDaisyNum(Daisy.TYPE.WHITE);
+			String data = String.format("%12d%23d%23d%18.3f%26.1f\n", currentTick, numWhites, numBlacks, solarLuminosity, globalTemperature);
+			//System.out.println(data);
+			output.write(data);
+			
 			// ask patches [calc-temperature]
 			for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
 				for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
@@ -53,8 +63,16 @@ public class DaisyWorld {
 				}
 			}
 			
+			
+			
+			
 			// diffuse temperature .5
 			diffuseHandler();
+			/* print the patch temperature distribution graph
+			System.out.println("Ticks:" + currentTick + " after diffues:");
+			System.out.print(getDistributionTemperatureGraph());
+			*/
+			
 			// ask daisies [check-survivability]
 			checkSurvivabilityHandler();
 			// set global-temperature (mean [temperature] of patches)
@@ -81,7 +99,22 @@ public class DaisyWorld {
 			if (scenario.equals("high-solar-luminosity")) {
 				solarLuminosity = 1.4;
 			}
+			
 		}
+	}
+	
+	private int getDaisyNum(Daisy.TYPE type) {
+		int num = 0;
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				if (patch.daisy != null && patch.daisy.type == type) {
+					num++;
+				}
+			}
+		}
+		return num;
 	}
 	
 	private void setGlobalTemperature() {
@@ -172,7 +205,7 @@ public class DaisyWorld {
 		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
 			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
 				String coordinate = String.valueOf(x) + "," + y;
-				Patch patch = new Patch();
+				Patch patch = new Patch(x, y);
 				patchGraph.put(coordinate, patch);
 			}
 		}
@@ -192,9 +225,9 @@ public class DaisyWorld {
 				}
 			}
 		}
-		/* print the daisy distribution graph
+		// print the daisy distribution graph
 		System.out.print(getDistributionGraph());
-		*/
+		
 		
 		// ask patches [calc-temperature]
 		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
@@ -203,6 +236,9 @@ public class DaisyWorld {
 				patchGraph.get(coordinate).calTemperature();
 			}
 		}
+		
+		// print the patch temperature distribution graph
+		System.out.print(getDistributionTemperatureGraph());
 	}
 	
 	private String getDistributionGraph() {
@@ -226,18 +262,39 @@ public class DaisyWorld {
 		return ret;
 	}
 	
+	private String getDistributionTemperatureGraph() {
+		String ret = "";
+		for (int y = MAX_PYCOR, x; y >= MIN_PYCOR; y--) {
+			for (x = MIN_PXCOR; x <= MAX_PXCOR; x++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				ret = ret + patch.temperature;
+				if (x == MAX_PXCOR) {
+					ret = ret + "\n";
+				}
+			}
+		}
+		return ret;	
+	}
+	
 	private void setDaisyRandomly(Daisy.TYPE type) {
 		ArrayList<Patch> emptyPatchList = getEmptyPatchList();
 		int totalPatch = (MAX_PXCOR - MIN_PXCOR + 1) * (MAX_PYCOR - MIN_PYCOR + 1);
 		int num;
 		if (type == Daisy.TYPE.BLACK) {
-			num = totalPatch * startBlacks / 100;
+			num = Math.round((float)totalPatch * startBlacks / 100);
+			System.out.println("Black num is " + num);
 		} else {
-			num = totalPatch * startWhites / 100;
+			num = Math.round((float)totalPatch * startWhites / 100);
+			System.out.println("White num is " + num);
 		}
 		for (int i = 0; i < num; i++) {
 			Patch emptyPatch = getRandomPatch(emptyPatchList);
-			emptyPatch.daisy = new Daisy(type);	
+			if (emptyPatch != null) {
+				emptyPatch.daisy = new Daisy(type);
+			} else {
+				break;
+			}	
 		}
 	}
 	
@@ -246,7 +303,11 @@ public class DaisyWorld {
 	 */
 	private Patch getRandomPatch(ArrayList<Patch> patchList) {
 		int listLength = patchList.size();
+		if (listLength == 0) {
+			return null;
+		}
 		int index = (int) (Math.random() * listLength);
+		System.out.println("the length: " + listLength + " get index: " + index);
 		Patch ret = patchList.get(index);
 		patchList.remove(index);
 		patchList.trimToSize();
@@ -265,6 +326,18 @@ public class DaisyWorld {
 			}
 		}
 		return emptyPatchList;
+	}
+	
+	private ArrayList<Patch> getPatchList() {
+		ArrayList<Patch> patchList = new ArrayList<Patch>();
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				patchList.add(patch);
+			}
+		}
+		return patchList;
 	}
 	
 	private void getInput(String[] commands) {

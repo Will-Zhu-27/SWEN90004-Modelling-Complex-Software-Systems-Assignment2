@@ -2,7 +2,13 @@ public class Patch {
 	protected Daisy daisy = null;
 	protected double temperature = 0;
 	protected double receicedDiffuse = 0;
+	protected int x;
+	protected int y;
 	
+	public Patch(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
 	public void calTemperature() {
 		double absorbedLuminosity = 0;
 		double localHeating = 0;

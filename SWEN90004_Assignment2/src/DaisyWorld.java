@@ -130,23 +130,37 @@ public class DaisyWorld {
 	}
 	
 	private void checkSurvivabilityHandler() {
-		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
-			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
-				String coordinate = String.valueOf(x) + "," + y;
-				Patch patch = patchGraph.get(coordinate);
-				// breed a same type daisy
-				if(patch.checkSurvivability() == true) {
-					//boolean flag = false;
-					for (String neighbourCoordinate : getNeighbours(x, y)) {
-						Patch neighbour = patchGraph.get(neighbourCoordinate);
-						if (neighbour.daisy == null) {
-							neighbour.daisy = new Daisy(patch.daisy.type);
-							//flag = true;
-							break;
-						}
+		ArrayList<Patch> patchList = getPatchList();
+		int num = patchList.size();
+		for (int i = 0; i < num; i++) {
+			Patch randomPatch = getRandomPatch(patchList);
+			if (randomPatch == null) {
+				return;
+			}
+			// breed a same type daisy
+			if(randomPatch.checkSurvivability() == true) {
+				//boolean flag = false;
+				ArrayList<String> neighbourCoordinateList = new ArrayList<String>();
+				String[] neighbourCoordinateSets = getNeighbours(randomPatch.x, randomPatch.y);
+				for (int j = 0; j < neighbourCoordinateSets.length; j++) {
+					neighbourCoordinateList.add(neighbourCoordinateSets[j]);
+				}
+				while(true) {
+					if (neighbourCoordinateList.size() == 0) {
+						break;
+					}
+					int index = (int) (Math.random() * neighbourCoordinateList.size());
+					String neighbourCoordinate = neighbourCoordinateList.get(index);
+					neighbourCoordinateList.remove(index);
+					neighbourCoordinateList.trimToSize();
+					Patch neighbour = patchGraph.get(neighbourCoordinate);
+					if (neighbour.daisy == null) {
+						neighbour.daisy = new Daisy(randomPatch.daisy.type);
+						//flag = true;
+						break;
 					}
 				}
-			}
+			}	
 		}
 	}
 	
@@ -307,7 +321,7 @@ public class DaisyWorld {
 			return null;
 		}
 		int index = (int) (Math.random() * listLength);
-		System.out.println("the length: " + listLength + " get index: " + index);
+		//System.out.println("the length: " + listLength + " get index: " + index);
 		Patch ret = patchList.get(index);
 		patchList.remove(index);
 		patchList.trimToSize();
@@ -373,7 +387,8 @@ public class DaisyWorld {
 				}
 				case "-albedo-of-whites": {
 					try {
-						albedoOfWhites = Float.parseFloat(commands[++i]);
+						int temp = (int) (Float.parseFloat(commands[++i]) * 100);
+						albedoOfWhites = (double)temp/100;
 						if (!(albedoOfWhites >= 0 && albedoOfWhites <= 0.99)) {
 							Exception e = new Exception();
 							throw e;
@@ -401,7 +416,8 @@ public class DaisyWorld {
 				}
 				case "-albedo-of-blacks": {
 					try {
-						albedoOfBlacks = Float.parseFloat(commands[++i]);
+						int temp = (int) (Float.parseFloat(commands[++i]) * 100);
+						albedoOfBlacks = (double)temp/100;
 						if (!(albedoOfBlacks >= 0 && albedoOfBlacks <= 0.99)) {
 							Exception e = new Exception();
 							throw e;
@@ -444,7 +460,8 @@ public class DaisyWorld {
 				}
 				case "-solar-luminosity": {
 					try {
-						solarLuminosity = Float.parseFloat(commands[++i]);
+						int temp = (int) (Float.parseFloat(commands[++i]) * 1000);
+						solarLuminosity = (double)temp/1000;
 						if (!(solarLuminosity >= MIN_SOLAR_LUMINOSITY && 
 							solarLuminosity <= MAX_SOLAR_LUMINOSITY)) {
 							Exception e = new Exception();
@@ -459,7 +476,8 @@ public class DaisyWorld {
 				}
 				case "-albedo-of-surface": {
 					try {
-						albedoOfSurface = Float.parseFloat(commands[++i]);
+						int temp = (int) (Float.parseFloat(commands[++i]) * 100);
+						albedoOfSurface = (double)temp/100;
 						if (!(albedoOfSurface >= MIN_ALBEDO_OF_SURFACE && 
 							albedoOfSurface <= MAX_ALBEDO_OF_SURFACE)) {
 							Exception e = new Exception();

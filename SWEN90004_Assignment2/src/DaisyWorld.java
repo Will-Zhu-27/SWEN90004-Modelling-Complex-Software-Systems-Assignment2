@@ -36,6 +36,9 @@ public class DaisyWorld {
 	public static int maxDaisyAge = 25;
 	private HashMap <String, Patch> patchGraph = new HashMap<>();
 	private Output output;
+	private boolean isExtended = false;
+	private int numMaleRabbits = 0;
+	private int numFemaleRabbits = 0;
 	public DaisyWorld(String[] commands) {
 		getInput(commands);
 		String paramterString = getExperimentParameter();
@@ -224,6 +227,12 @@ public class DaisyWorld {
 			}
 		}
 		
+		if (isExtended == true) {
+			setRabbitRandomly(Rabbit.GENDER.MALE);
+			setRabbitRandomly(Rabbit.GENDER.FEMALE);
+			System.out.println(getDistributionRabbitsGraph());
+		}
+		
 		// seed-blacks-randomly
 		setDaisyRandomly(Daisy.TYPE.BLACK);
 		// seed-whites-randomly
@@ -255,6 +264,25 @@ public class DaisyWorld {
 		// System.out.print(getDistributionTemperatureGraph());
 	}
 	
+	private void setRabbitRandomly(Rabbit.GENDER gender) {
+		ArrayList<Patch> emptyPatchList = getEmptyRabbitPatchList();
+		int totalPatch = (MAX_PXCOR - MIN_PXCOR + 1) * (MAX_PYCOR - MIN_PYCOR + 1);
+		int num;
+		if (gender == Rabbit.GENDER.MALE) {
+			num = numMaleRabbits;
+		} else {
+			num = numFemaleRabbits;
+		}
+		for (int i = 0; i < num; i++) {
+			Patch emptyPatch = getRandomPatch(emptyPatchList);
+			if (emptyPatch != null) {
+				emptyPatch.rabbit = new Rabbit(gender);
+			} else {
+				break;
+			}	
+		}
+	}
+	
 	private String getDistributionGraph() {
 		String ret = "";
 		for (int y = MAX_PYCOR, x; y >= MIN_PYCOR; y--) {
@@ -267,6 +295,27 @@ public class DaisyWorld {
 					ret = ret + "B";
 				} else {
 					ret = ret + "W";
+				}
+				if (x == MAX_PXCOR) {
+					ret = ret + "\n";
+				}
+			}
+		}
+		return ret;
+	}
+	
+	private String getDistributionRabbitsGraph() {
+		String ret = "";
+		for (int y = MAX_PYCOR, x; y >= MIN_PYCOR; y--) {
+			for (x = MIN_PXCOR; x <= MAX_PXCOR; x++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				if (patch.rabbit == null) {
+					ret = ret + " ";
+				} else if (patch.rabbit.gender == Rabbit.GENDER.MALE) {
+					ret = ret + "M";
+				} else {
+					ret = ret + "F";
 				}
 				if (x == MAX_PXCOR) {
 					ret = ret + "\n";
@@ -335,6 +384,20 @@ public class DaisyWorld {
 				String coordinate = String.valueOf(x) + "," + y;
 				Patch patch = patchGraph.get(coordinate);
 				if (patch.daisy == null) {
+					emptyPatchList.add(patch);
+				}
+			}
+		}
+		return emptyPatchList;
+	}
+	
+	private ArrayList<Patch> getEmptyRabbitPatchList() {
+		ArrayList<Patch> emptyPatchList = new ArrayList<Patch>();
+		for (int x = MIN_PXCOR, y; x <= MAX_PXCOR; x++) {
+			for (y = MIN_PYCOR; y <= MAX_PYCOR; y++) {
+				String coordinate = String.valueOf(x) + "," + y;
+				Patch patch = patchGraph.get(coordinate);
+				if (patch.rabbit == null) {
 					emptyPatchList.add(patch);
 				}
 			}
@@ -490,6 +553,36 @@ public class DaisyWorld {
 					}
 					break;
 				}
+				case "-start-male-rabbits": {
+					isExtended = true;
+					try {
+						numMaleRabbits = Integer.parseInt(commands[++i]);
+						if (numMaleRabbits >  Rabbit.MAX_MALE_RABBITS || numMaleRabbits < 0) {
+							Exception e = new Exception();
+							throw e;
+						}
+					} catch (Exception e) {
+						System.err.println("Wrong format! \"-start-male-rabbits\"" + 
+							" cannot more than " + Rabbit.MAX_MALE_RABBITS);
+						System.exit(1);
+					}
+					break;
+				}
+				case "-start-female-rabbits": {
+					isExtended = true;
+					try {
+						numFemaleRabbits = Integer.parseInt(commands[++i]);
+						if (numFemaleRabbits >  Rabbit.MAX_MALE_RABBITS || numFemaleRabbits < 0) {
+							Exception e = new Exception();
+							throw e;
+						}
+					} catch (Exception e) {
+						System.err.println("Wrong format! \"-start-female-rabbits\"" + 
+							" cannot more than " + Rabbit.MAX_FEMALE_RABBITS);
+						System.exit(1);
+					}
+					break;
+				}
 				default: {
 					break;
 				}
@@ -528,6 +621,10 @@ public class DaisyWorld {
 		ret = ret + ", start-%-blacks = " + startBlacks;
 		ret = ret + ", albedo-of-blacks = " + albedoOfBlacks;
 		ret = ret + ", total ticks = " + ticks;
+		if (isExtended == true) {
+			ret = ret + ", start-male-rabbits = " + numMaleRabbits;
+			ret = ret + ", start-female-rabbits = " + numFemaleRabbits;
+		}
 		ret = ret + ".\n";
 		return ret;
 	}

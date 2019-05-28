@@ -1,5 +1,6 @@
 public class Patch {
 	protected Daisy daisy = null;
+	protected Rabbit rabbit = null;
 	protected double temperature = 0D;
 	protected double receicedDiffuse = 0D;
 	protected int x;

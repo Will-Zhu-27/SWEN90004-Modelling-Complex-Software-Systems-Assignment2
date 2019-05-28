@@ -7,6 +7,8 @@
 -scenario   //optional, default:maintain current luminosity
 -solar-luminosity //如果scenario指定了，则可能被覆盖
 -albedo-of-surface
+-start-male-rabbits
+-start-female-rabbits
 
 example: Simulator -ticks 2000 -start-%-whites 24 -albedo-of-whites 0.5 -start-%-blacks 24 -albedo-of-blacks 0.5 -scenario our-solar-luminosity -solar-luminosity 1.888 -albedo-of-surface 0.8
 

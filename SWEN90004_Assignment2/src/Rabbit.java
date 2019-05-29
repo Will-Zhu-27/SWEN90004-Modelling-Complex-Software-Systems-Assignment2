@@ -1,3 +1,8 @@
+/**
+ * Represent Rabbit.
+ * @author yuqiangz@student.unimelb.edu.au
+ *
+ */
 public class Rabbit {
 	public final static int MAX_RABBIT_AGE = 12;
 	public final static int MAX_HUNGRY = 10;
@@ -6,6 +11,7 @@ public class Rabbit {
 	public final static int MAX_BREED_TEMPERATURE = 35;
 	public final static int MIN_BREED_TEMPERATURE = 15;
 	public enum GENDER {MALE, FEMALE};
+	
 	protected GENDER gender;
 	protected int age = 0;
 	protected int hungry = 0;

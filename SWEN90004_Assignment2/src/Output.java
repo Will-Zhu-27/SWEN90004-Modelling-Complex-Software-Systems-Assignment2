@@ -1,7 +1,11 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
+/**
+ * Output class is responsible to generate a file which contains result.
+ * @author yuqiangz@student.unimelb.edu.au
+ *
+ */
 public class Output {
 	public static final String HEADER = 
 		"tick,num-white-daisy,num-black-daisy,luminosity,global-temperature\r\n";

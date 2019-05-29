@@ -1,9 +1,16 @@
+/**
+ * Represent Patch
+ * @author yuqiangz@student.unimelb.edu.au
+ *
+ */
 public class Patch {
 	protected Daisy daisy = null;
 	protected Rabbit rabbit = null;
 	protected double temperature = 0D;
 	protected double receicedDiffuse = 0D;
+	// x-coordinate in NetLogo
 	protected int x;
+	// y-coordinate in NetLogo
 	protected int y;
 	
 	public Patch(int x, int y) {
@@ -37,7 +44,7 @@ public class Patch {
 		
 		double seedThreshold = 0D;
 		daisy.age++;
-		if(daisy.age < DaisyWorld.maxDaisyAge) {
+		if(daisy.age < Daisy.MAX_DAISY_AGE) {
 			seedThreshold = (0.1457 * temperature) - (0.0032 * temperature * temperature) - 0.6443;
 			if (Math.random() < seedThreshold) {
 				return true;
@@ -61,7 +68,8 @@ public class Patch {
 				return false;
 			} else {
 				// in appropriate temperature
-				if(temperature <= Rabbit.MAX_BREED_TEMPERATURE && temperature >= Rabbit.MIN_BREED_TEMPERATURE && rabbit.hungry < 0) {
+				if(temperature <= Rabbit.MAX_BREED_TEMPERATURE && 
+					temperature >= Rabbit.MIN_BREED_TEMPERATURE && rabbit.hungry < 0) {
 					return true;
 				}
 				return false;

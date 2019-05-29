@@ -1,0 +1,38 @@
+Compile:
+    javac Simulator.java
+
+To launch the program, you need to set parameters when you run the program.
+About the parameters:
+-ticks  //  specify how many ticks you want the program execute (compulsory)
+-start-%-whites //  specify the percent fo white daisies at the beginning (optional, default value 20)
+-albedo-of-whites //  specify the albedo of white daisies (optional, default value 0.75)
+-start-%-blacks //  specify the percent fo black daisies at the beginning (optional, default value 20)
+-albedo-of-blacks   //  specify the albedo of black daisies (optional, default value 0.75)
+-scenario //  specify which scenario you want to use. pick up one of value:maintain-current-luminosity, ramp-up-ramp-down, low-solar-luminosity, our-solar-luminosity, high-solar-luminosity. (optional, default value maintain-current-luminosity)
+-solar-luminosity   // specify the value of solar luminosity (optional, default value 0.8)
+-albedo-of-surface  // specify the value of albedo of surface (optional, default value 0.4)
+-start-male-rabbits // the extend part: specify the num of male rabbits at the beginning (optional, default value 0)
+-start-female-rabbits   // the extend part: specify the num of female rabbits at the beginning (optional, default value 0)
+
+
+Launch command example:
+    /* Program will run 1000 ticks under the default configuration. */
+    java Simulator -ticks 1000
+
+    /* -start-%-whites=25, -albedo-of-whites=0.8 -start-%-blacks=25 -albedo-of-blacks=0.20 
+     * Program will run 1000 ticks.
+     */
+    java Simulator -ticks 1000 -start-%-whites 25 -albedo-of-whites 0.8 -start-%-blacks 25 -albedo-of-blacks 0.20
+    
+    /*
+     * scenario is ramp-up-ramp-down. Program will run 1000 ticks.
+     * note: according to the scenario you specify, -solar-luminosity will be covered even if you alreadly specify its value
+     */
+     java Simulator -ticks 1000 -scenario ramp-up-ramp-down
+
+     /*
+      * generate 50 male rabbits and 80 female rabbits. Program will run 1000 ticks.
+      */
+    java Simulator -ticks 1000 -start-male-rabbits 50 -start-female-rabbits 80
+
+After launch the program, it will print the configuration firstly. If the input parameters are wrong, it will give you corresponding wrong information. If the input parameters are right, it should generate a csv file called "output.csv".

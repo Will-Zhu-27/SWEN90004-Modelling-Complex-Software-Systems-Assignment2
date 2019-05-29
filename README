@@ -3,15 +3,15 @@ Compile:
 
 To launch the program, you need to set parameters when you run the program.
 About the parameters:
--ticks  //  specify how many ticks you want the program execute (compulsory)
--start-%-whites //  specify the percent fo white daisies at the beginning (optional, default value 20)
--albedo-of-whites //  specify the albedo of white daisies (optional, default value 0.75)
--start-%-blacks //  specify the percent fo black daisies at the beginning (optional, default value 20)
--albedo-of-blacks   //  specify the albedo of black daisies (optional, default value 0.75)
--scenario //  specify which scenario you want to use. pick up one of value:maintain-current-luminosity, ramp-up-ramp-down, low-solar-luminosity, our-solar-luminosity, high-solar-luminosity. (optional, default value maintain-current-luminosity)
--solar-luminosity   // specify the value of solar luminosity (optional, default value 0.8)
--albedo-of-surface  // specify the value of albedo of surface (optional, default value 0.4)
--start-male-rabbits // the extend part: specify the num of male rabbits at the beginning (optional, default value 0)
+-ticks                  //  specify how many ticks you want the program execute (compulsory)
+-start-%-whites         //  specify the percent fo white daisies at the beginning (optional, default value 20)
+-albedo-of-whites       //  specify the albedo of white daisies (optional, default value 0.75)
+-start-%-blacks         //  specify the percent fo black daisies at the beginning (optional, default value 20)
+-albedo-of-blacks       //  specify the albedo of black daisies (optional, default value 0.75)
+-scenario               //  specify which scenario you want to use. pick up one of value:maintain-current-luminosity, ramp-up-ramp-down, low-solar-luminosity, our-solar-luminosity, high-solar-luminosity. (optional, default value maintain-current-luminosity)
+-solar-luminosity       // specify the value of solar luminosity (optional, default value 0.8)
+-albedo-of-surface      // specify the value of albedo of surface (optional, default value 0.4)
+-start-male-rabbits     // the extend part: specify the num of male rabbits at the beginning (optional, default value 0)
 -start-female-rabbits   // the extend part: specify the num of female rabbits at the beginning (optional, default value 0)
 
 
